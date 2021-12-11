@@ -4,15 +4,22 @@
 
         AutoCreateKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "AUOptions", 1, RegistryValueKind.DWord)
         AutoCreateKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoUpdate", 0, RegistryValueKind.DWord)
+        AutoCreateKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "AllowMUUpdateService", 1, RegistryValueKind.DWord)
+        AutoCreateKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoRebootWithLoggedOnUsers", 1, RegistryValueKind.DWord)
+
+        AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\7971F918-A847-4430-9279-4A52D1EFE18D", "RegisteredWithAU", 1, RegistryValueKind.DWord)
 
         AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update", "AUOptions", 1, RegistryValueKind.DWord)
 
+        AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\WindowsStore", "AutoDownload", 4, RegistryValueKind.DWord)
         AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", "AutoDownload", 4, RegistryValueKind.DWord)
         AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore", "AutoDownload", 4, RegistryValueKind.DWord)
 
         AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "RestartNotificationsAllowed2", 1, RegistryValueKind.DWord)
+        AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "AllowAutoWindowsUpdateDownloadOverMeteredNetwork", 1, RegistryValueKind.DWord)
+        AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "IsExpedited", 0, RegistryValueKind.DWord)
 
-        If Val(ReadRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", "AutoDownload")) = 4 Then
+        If Val(ReadRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\WindowsStore", "AutoDownload")) = 4 Then
             Me.chkautoupdateapps.Checked = True
         Else
             Me.chkautoupdateapps.Checked = False
@@ -29,6 +36,10 @@
         Me.chknoautoreboot.Checked = CBool(Val(ReadRegKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoRebootWithLoggedOnUsers")))
 
         Me.chkwuserver.Checked = CBool(Val(ReadRegKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "UseWUServer")))
+
+        Me.chkupdatems.Checked = CBool(Val(ReadRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU", "AllowMUUpdateService")))
+
+        Me.chkdownloadmetered.Checked = CBool(Val(ReadRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "AllowAutoWindowsUpdateDownloadOverMeteredNetwork")))
 
         Me.txtwuserver.Text = ReadRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "WUServer")
 
@@ -121,9 +132,11 @@
         If Me.chkautoupdateapps.Checked = True Then
             WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", "AutoDownload", 4, RegistryValueKind.DWord)
             WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore", "AutoDownload", 4, RegistryValueKind.DWord)
+            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\WindowsStore", "AutoDownload", 4, RegistryValueKind.DWord)
         Else
             WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", "AutoDownload", 2, RegistryValueKind.DWord)
-            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore", "AutoDownload", 4, RegistryValueKind.DWord)
+            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore", "AutoDownload", 2, RegistryValueKind.DWord)
+            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\WindowsStore", "AutoDownload", 2, RegistryValueKind.DWord)
         End If
 
         WriteRegKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoUpdate", Convert.ToInt32(Not Me.chkautoupdate.Checked), RegistryValueKind.DWord)
@@ -136,10 +149,16 @@
 
         WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "RestartNotificationsAllowed", Convert.ToInt32(Me.chknotifyrestart.Checked), RegistryValueKind.DWord)
         WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "RestartNotificationsAllowed2", Convert.ToInt32(Me.chknotifyrestart.Checked), RegistryValueKind.DWord)
+        WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "AllowAutoWindowsUpdateDownloadOverMeteredNetwork", Convert.ToInt32(Me.chkdownloadmetered.Checked), RegistryValueKind.DWord)
+
 
         WriteRegKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoRebootWithLoggedOnUsers", Convert.ToInt32(Me.chknoautoreboot.Checked), RegistryValueKind.DWord)
+        WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "IsExpedited", 1 - Convert.ToInt32(Me.chknoautoreboot.Checked) / 1, RegistryValueKind.DWord)
 
         WriteRegKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "UseWUServer", Convert.ToInt32(Me.chkwuserver.Checked), RegistryValueKind.DWord)
+
+        WriteRegKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "AllowMUUpdateService", Convert.ToInt32(Me.chkupdatems.Checked), RegistryValueKind.DWord)
+        WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Services\7971F918-A847-4430-9279-4A52D1EFE18D", "RegisteredWithAU", Convert.ToInt32(Me.chkupdatems.Checked), RegistryValueKind.DWord)
 
         WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "WUServer", Me.txtwuserver.Text, RegistryValueKind.String)
         WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate", "WUStatusServer", Me.txtwustatusserver.Text, RegistryValueKind.String)
