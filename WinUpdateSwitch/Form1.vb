@@ -19,11 +19,7 @@
         AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "AllowAutoWindowsUpdateDownloadOverMeteredNetwork", 1, RegistryValueKind.DWord)
         AutoCreateKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\WindowsUpdate\UX\Settings", "IsExpedited", 0, RegistryValueKind.DWord)
 
-        If Val(ReadRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\WindowsStore", "AutoDownload")) = 4 Then
-            Me.chkautoupdateapps.Checked = True
-        Else
-            Me.chkautoupdateapps.Checked = False
-        End If
+        Me.chkautoupdateapps.Checked = CBool((Val(ReadRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\WindowsStore", "AutoDownload")) / 2) - 1)
 
         Me.chkautoupdate.Checked = Not CBool(Val(ReadRegKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoUpdate")))
 
@@ -129,15 +125,9 @@
 
     Private Sub cmdok_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles cmdok.Click
 
-        If Me.chkautoupdateapps.Checked = True Then
-            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", "AutoDownload", 4, RegistryValueKind.DWord)
-            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore", "AutoDownload", 4, RegistryValueKind.DWord)
-            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\WindowsStore", "AutoDownload", 4, RegistryValueKind.DWord)
-        Else
-            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", "AutoDownload", 2, RegistryValueKind.DWord)
-            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore", "AutoDownload", 2, RegistryValueKind.DWord)
-            WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\WindowsStore", "AutoDownload", 2, RegistryValueKind.DWord)
-        End If
+        WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate", "AutoDownload", (Convert.ToInt32(Me.chkautoupdateapps.Checked) * 2) + 2, RegistryValueKind.DWord)
+        WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore", "AutoDownload", (Convert.ToInt32(Me.chkautoupdateapps.Checked) * 2) + 2, RegistryValueKind.DWord)
+        WriteRegKey(RegistryHive.LocalMachine, "SOFTWARE\Policies\Microsoft\WindowsStore", "AutoDownload", (Convert.ToInt32(Me.chkautoupdateapps.Checked) * 2) + 2, RegistryValueKind.DWord)
 
         WriteRegKey(RegistryHive.LocalMachine, "Software\Policies\Microsoft\Windows\WindowsUpdate\AU", "NoAutoUpdate", Convert.ToInt32(Not Me.chkautoupdate.Checked), RegistryValueKind.DWord)
 
